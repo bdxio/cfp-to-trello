@@ -1,3 +1,6 @@
+/**
+ * Asks the user to authorize the API to use his Trello account.
+ */
 export const authorize = () => {
     return new Promise((resolve, reject) => {
         window.Trello.authorize({
@@ -13,13 +16,34 @@ export const authorize = () => {
     });
 };
 
+/**
+ * Returns the current authenticated user.
+ */
 export const getMe = () => {
     return new Promise((resolve, reject) => {
         window.Trello.members.get("me", resolve, reject);
     });
 };
 
-export const createTrelloBoard = (name, idOrganization) => {
+/**
+ * Returns the organization given its name (https://developers.trello.com/reference#organization-object).
+ * This name can be found in the URL used by Trello (it might not be the same as the one displayed in Trello ; an organization named "Test" won't have this name in the Trello API because it is very likey that other organizations with the very same name exist in other Trello accounts).
+ * 
+ * @param {String} name The "technical" name of the organization
+ */
+export const getOrganization = (name) => {
+    return new Promise((resolve, reject) => {
+        window.Trello.organizations.get(name, resolve, reject);
+    });
+};
+
+/**
+ * Creates a board for an organization.
+ * 
+ * @param {String} name The name of the board to create
+ * @param {TrelloOrganization} organization The organization in which the board should be created
+ */
+export const createTrelloBoard = (name, organization) => {
     const board = {
         name,
         defaultLabels: false,
@@ -32,6 +56,12 @@ export const createTrelloBoard = (name, idOrganization) => {
     });
 };
 
+/**
+ * Creates a list in a board.
+ * 
+ * @param {String} name The name of the list to create
+ * @param {TrelloBoard} board The board in which the list should be created
+ */
 export const createTrelloList = (name, board) => {
     const list = {
         name,
