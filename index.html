@@ -11,9 +11,18 @@
         integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
         crossorigin="anonymous"></script>
     <script src="https://api.trello.com/1/client.js?key=1a3702b425c628ae8d1f9e6467f9a954"></script>
-    <script src="./index.js"></script>
+    <script src="./src/index.js"></script>
 </head>
 <body>
+    <p>
+        Cette page permet d'importer les propositions du CFP dans Trello sous forme de cartes dans plusieurs tableaux (un tableau Trello par type de propositions).
+        <br>
+        Il suffit d'indiquer le nom de l'organisation à laquelle rattacher les tableaux et de cliquer sur le bouton "Import".
+    </p>
+    <input id="txt-organization" type="text" placeholder="Organisation Trello" value="bdxio"/>
     <input id="btn-import" type="button" value="Import"/>
+    <p>
+        <textarea id="txt-output" readonly rows="24" cols="80"></textarea>
+    </p>
 </body>
 </html>
