@@ -43,6 +43,12 @@ export const createTrelloList = (name, board) => {
     })
 };
 
+/**
+ * Creates a Trello label for a given board
+ * @param {String} name The name of the label (which will be displayed on the card)
+ * @param {TrelloBoard} board The board to create the label for
+ * @param {String} color The color of the label (might be one of yellow, purple, blue, red, green, orange, black, sky, pink, lime, null)
+ */
 export const createTrelloLabel = (name, board, color) => {
     const label = {
         idBoard: board.id,
@@ -52,5 +58,25 @@ export const createTrelloLabel = (name, board, color) => {
 
     return new Promise((resolve, reject) => {
         window.Trello.post("labels", label, resolve, reject);
+    });
+};
+
+/**
+ * Creates a Trello card
+ * @param {String} name The name of the card
+ * @param {String} description The description of the card
+ * @param {TrelloList} list The list in which the card should be created
+ * @param {Array[String]} labels List of id labels to add to the card
+ */
+export const createTrelloCard = (name, description, list, labels) => {
+    const card = {
+        name,
+        description,
+        idList: list.id,
+        idLabels: labels.join(","),
+    };
+
+    return new Promise((resolve, reject) => {
+        window.Trello.post("cards", card, resolve, reject);
     });
 };
