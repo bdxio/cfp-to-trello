@@ -2,6 +2,12 @@
 
 > Simple frontend application to export BDX I/O CFP proposals to Trello boards and cards for final ballot.
 
+This application is used to import CFP proposals into Trello boards.
+
+For each type of proposals a dedicated Trello board is created.  
+All proposals are then grouped by track and split into three thirds, from top rated to lower rated.  
+For each proposal a Trello card is created and put in a Trello list specific to its track and rating, for the first two thirds. All last third proposals are put together in another Trello list.
+
 ## Install
 
 You first need to download manually the JSON file containing all the proposals and their votes from the CFP.
