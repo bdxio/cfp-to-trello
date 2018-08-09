@@ -51,6 +51,12 @@ let clearLog;
  * Main function executed when the "Import" button is clicked.
  */
 const run = async () => {
+  const organizationName = document.getElementById("txt-organization").value;
+  if (organizationName == null || organizationName.trim() == "") {
+    window.alert("The name of the Trello organization is required");
+    return;
+  }
+
   clearLog();
   performance.mark("trello-import-start");
   const txtOutput = document.getElementById("txt-output");
@@ -58,12 +64,6 @@ const run = async () => {
     textarea.scrollTop = textarea.scrollHeight;
   };
   const scrollTextAreaInterval = setInterval(scrollTextArea, 50, txtOutput);
-
-  const organizationName = document.getElementById("txt-organization").value;
-  if (organizationName == null || organizationName.trim() == "") {
-    window.alert("The name of the Trello organization is required");
-    return;
-  }
 
   try {
     const proposals = parseProposalsVotes(allvotesJson);
