@@ -81,7 +81,6 @@ const run = async () => {
     );
 
     const boards = await createDeliberationBoards(proposals, organization);
-    performance.mark("trello-import-end");
     performance.measure("trello-import", "trello-import-start");
     const measure = performance.getEntriesByName("trello-import")[0];
     log(
