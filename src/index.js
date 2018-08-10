@@ -10,7 +10,8 @@ import {
   createTrelloBoard,
   createTrelloList,
   createTrelloLabel,
-  createTrelloCard
+  createTrelloCard,
+  createTrelloComment
 } from "./trello";
 
 const BOARD_NAME_PREFIX = "Délibération";
@@ -139,6 +140,7 @@ const parseProposalsVotes = proposalsVotes => {
     audienceLevel: AUDIENCE_LEVELS[proposal.audienceLevel],
     lang: LANGS[proposal.lang],
     speakers: proposal.allSpeakers.map(mapSpeaker).join(" / "),
+    privateMessage: proposal.privateMessage,
     average: votes.average,
     // average has 3 decimal places so we do the same for the standard deviation
     stdDeviation: computeStdDeviation(votes.average, votes.voters).toFixed(3)
@@ -282,7 +284,8 @@ const createProposalCard = async (list, proposal, board) => {
   idLabels.push(await createLabel(proposal.audienceLevel, board, "sky"));
   idLabels.push(await createLabel(proposal.lang, board, "pink"));
 
-  await createTrelloCard(proposal.title, proposal.summary, list, idLabels);
+  const card = await createTrelloCard(proposal.title, proposal.summary, list, idLabels);
+  await createTrelloComment(proposal.privateMessage, card);
 };
 
 /**
