@@ -284,7 +284,12 @@ const createProposalCard = async (list, proposal, board) => {
   idLabels.push(await createLabel(proposal.audienceLevel, board, "sky"));
   idLabels.push(await createLabel(proposal.lang, board, "pink"));
 
-  const card = await createTrelloCard(proposal.title, proposal.summary, list, idLabels);
+  const card = await createTrelloCard(
+    proposal.title,
+    proposal.summary,
+    list,
+    idLabels
+  );
   await createTrelloComment(proposal.privateMessage, card);
 };
 

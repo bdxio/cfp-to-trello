@@ -44,7 +44,11 @@ export const getOrganization = name => {
  * @param {TrelloOrganization} organization The organization in which the board should be created
  * @param {"private" | "org" | "public"} The visibility of the board, private by default
  */
-export const createTrelloBoard = (name, { id: idOrganization }, visibility = "private") => {
+export const createTrelloBoard = (
+  name,
+  { id: idOrganization },
+  visibility = "private"
+) => {
   const board = {
     name,
     idOrganization,
@@ -89,7 +93,7 @@ export const createTrelloList = (name, { id: idBoard }) => {
 
 /**
  * Creates a Trello label for a given board.
- * 
+ *
  * @param {String} name The name of the label (which will be displayed on the card)
  * @param {TrelloBoard} board The board to create the label for
  * @param {String} color The color of the label (might be one of yellow, purple, blue, red, green, orange, black, sky, pink, lime, null)
@@ -108,7 +112,7 @@ export const createTrelloLabel = (name, { id: idBoard }, color) => {
 
 /**
  * Creates a Trello card.
- * 
+ *
  * @param {String} name The name of the card
  * @param {String} desc The description of the card
  * @param {TrelloList} list The list in which the card should be created
@@ -129,12 +133,17 @@ export const createTrelloCard = (name, desc, { id: idList }, labels) => {
 
 /**
  * Create a comment on a card.
- * 
+ *
  * @param {String} comment The comment to add to the card
  * @param {TrelloCard} card The card on which the comment should be added
  */
 export const createTrelloComment = (comment, card) => {
   return new Promise((resolve, reject) => {
-    window.Trello.post(`cards/${card.id}/actions/comments`, { text: comment }, resolve, reject);
+    window.Trello.post(
+      `cards/${card.id}/actions/comments`,
+      { text: comment },
+      resolve,
+      reject
+    );
   });
 };
