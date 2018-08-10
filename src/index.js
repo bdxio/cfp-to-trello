@@ -182,7 +182,7 @@ const createBoard = async (proposals, name, talkType, year, organization) => {
   log(
     `Creating the board ${boardName} for ${boardProposals.length} proposals...`
   );
-  const board = await createTrelloBoard(boardName, organization);
+  const board = await createTrelloBoard(boardName, organization, "org");
   log("Creating lists for the board...");
   await createTrelloList("Sélection", board);
   await createTrelloList("Désistements", board);

@@ -42,13 +42,15 @@ export const getOrganization = name => {
  *
  * @param {String} name The name of the board to create
  * @param {TrelloOrganization} organization The organization in which the board should be created
+ * @param {"private" | "org" | "public"} The visibility of the board, private by default
  */
-export const createTrelloBoard = (name, { id: idOrganization }) => {
+export const createTrelloBoard = (name, { id: idOrganization }, visibility = "private") => {
   const board = {
     name,
     idOrganization,
     defaultLabels: false,
-    defaultLists: false
+    defaultLists: false,
+    prefs_permissionLevel: visibility
   };
 
   return new Promise((resolve, reject) => {
