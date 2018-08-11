@@ -36,7 +36,10 @@ const AUDIENCE_LEVELS = {
   l2: "Intermédiaire",
   l3: "Expert"
 };
+
 const LANGS = { fr: "🇫🇷", en: "🇬🇧" };
+
+const CFP_URL = "https://cfp.bdx.io";
 
 /**
  * Function created when the document is loaded to display import progression.
@@ -295,9 +298,13 @@ const createProposalCard = async (list, proposal, board) => {
   }
   idLabels.push(await createLabel(proposal.lang, board, "pink"));
 
+  const proposalUrl = `${CFP_URL}/cfpadmin/proposal/${proposal.id}`;
+  const proposalLink = `[Proposal](${proposalUrl})`;
+  const votesLink = `[Votes](${proposalUrl}/score)`;
+  const cardDescription = `${proposalLink} • ${votesLink}\n\n---\n\n${proposal.summary}`;
   const card = await createTrelloCard(
     proposal.title,
-    proposal.summary,
+    cardDescription,
     list,
     idLabels
   );
