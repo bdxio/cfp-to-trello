@@ -142,6 +142,7 @@ const parseProposalsVotes = proposalsVotes => {
     speakers: proposal.allSpeakers.map(mapSpeaker).join(" / "),
     privateMessage: proposal.privateMessage,
     average: votes.average,
+    totalVoters: votes.totalVoters,
     // average has 3 decimal places so we do the same for the standard deviation
     stdDeviation: computeStdDeviation(votes.average, votes.voters).toFixed(3)
   }));
@@ -276,7 +277,13 @@ const createProposalCard = async (list, proposal, board) => {
 
   const idLabels = [];
   idLabels.push(await createLabel(proposal.track, board, "green"));
-  idLabels.push(await createLabel(`avg:${proposal.average}`, board, "orange"));
+  idLabels.push(
+    await createLabel(
+      `avg:${proposal.average} (${proposal.totalVoters})`,
+      board,
+      "orange"
+    )
+  );
   idLabels.push(
     await createLabel(`dev:${proposal.stdDeviation}`, board, "red")
   );
