@@ -141,6 +141,7 @@ const parseProposalsVotes = proposalsVotes => {
     lang: LANGS[proposal.lang],
     speakers: proposal.allSpeakers.map(mapSpeaker).join(" / "),
     privateMessage: proposal.privateMessage,
+    liveCoding: proposal.liveCoding,
     average: votes.average,
     totalVoters: votes.totalVoters,
     // average has 3 decimal places so we do the same for the standard deviation
@@ -289,6 +290,9 @@ const createProposalCard = async (list, proposal, board) => {
   );
   idLabels.push(await createLabel(proposal.speakers, board, "purple"));
   idLabels.push(await createLabel(proposal.audienceLevel, board, "sky"));
+  if (proposal.liveCoding) {
+    idLabels.push(await createLabel("⌨️", board, "lime"));
+  }
   idLabels.push(await createLabel(proposal.lang, board, "pink"));
 
   const card = await createTrelloCard(
