@@ -10,8 +10,7 @@ import {
   createTrelloBoard,
   createTrelloList,
   createTrelloLabel,
-  createTrelloCard,
-  createTrelloComment
+  createTrelloCard
 } from "./trello";
 
 const BOARD_NAME_PREFIX = "Délibération";
@@ -301,14 +300,21 @@ const createProposalCard = async (list, proposal, board) => {
   const proposalUrl = `${CFP_URL}/cfpadmin/proposal/${proposal.id}`;
   const proposalLink = `[Proposal](${proposalUrl})`;
   const votesLink = `[Votes](${proposalUrl}/score)`;
-  const cardDescription = `${proposalLink} • ${votesLink}\n\n---\n\n${proposal.summary}`;
+  const cardDescription = `${proposalLink} • ${votesLink}
+  
+  ---
+  
+  ${proposal.summary}
+  
+  ---
+  
+  ${proposal.privateMessage}`;
   const card = await createTrelloCard(
     proposal.title,
     cardDescription,
     list,
     idLabels
   );
-  await createTrelloComment(proposal.privateMessage, card);
 };
 
 /**
