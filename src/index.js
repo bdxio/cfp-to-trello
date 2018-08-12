@@ -84,6 +84,9 @@ const run = async () => {
     );
 
     const boards = await createDeliberationBoards(proposals, organization);
+
+    createBoardsParagraph(boards);
+
     performance.measure("trello-import", "trello-import-start");
     const measure = performance.getEntriesByName("trello-import")[0];
     log(
@@ -100,6 +103,27 @@ const run = async () => {
     performance.clearMeasures();
     clearInterval(scrollTextAreaInterval);
   }
+};
+
+/**
+ * Create an HTML paragraph used to display information on created boards.
+ * 
+ * @param {Array[TrelloBoard]} boards The created Trello boards list
+ */
+const createBoardsParagraph = boards => {
+  const paragraph = document.createElement("p");
+  paragraph.innerHTML = boards.map(createBoardUrlText).join("<br>");
+  document.body.appendChild(paragraph);
+}
+
+/**
+ * Create a text to display information on a created Trello board
+ * 
+ * @param {TrelloBoard} board The Trello board
+ * @returns {TextNode} The text containing the information about the created board
+ */
+const createBoardUrlText = board => {
+  return `Le board ${board.name} a bien été créé : <a href="${board.shortUrl}" target="_blank">${board.shortUrl}</a>`;
 };
 
 /**
@@ -160,10 +184,13 @@ const parseProposalsVotes = proposalsVotes => {
  */
 const createDeliberationBoards = async (proposals, organization) => {
   const year = new Date().getFullYear();
+  const boards = [];
 
   for (const { name, talkType } of BOARDS_TO_CREATE) {
-    await createBoard(proposals, name, talkType, year, organization);
+    boards.push(await createBoard(proposals, name, talkType, year, organization));
   }
+
+  return boards;
 };
 
 /**
