@@ -327,7 +327,8 @@ const createProposalCard = async (list, proposal, board) => {
   const proposalUrl = `${CFP_URL}/cfpadmin/proposal/${proposal.id}`;
   const proposalLink = `[Proposal](${proposalUrl})`;
   const votesLink = `[Votes](${proposalUrl}/score)`;
-  const cardDescription = `${proposalLink} • ${votesLink}
+  const approveLink = `[APPROVE](${CFP_URL}/ar/preaccept/${proposal.id})`;
+  const cardDescription = `${proposalLink} • ${votesLink} • ⚠️ ${approveLink} ⚠️
   
   ---
   
@@ -336,6 +337,7 @@ const createProposalCard = async (list, proposal, board) => {
   ---
   
   ${proposal.privateMessage}`;
+
   const card = await createTrelloCard(
     proposal.title,
     cardDescription,
