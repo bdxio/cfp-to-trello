@@ -7,7 +7,8 @@ import {
   createTrelloBoard,
   createTrelloList,
   createTrelloLabel,
-  createTrelloCard
+  createTrelloCard,
+  createTrelloComment
 } from "./trello";
 import cfp from "../data/export.json";
 
@@ -258,6 +259,7 @@ const parseTalks = async (talks) => {
     average: Number(talk.rating).toFixed(2),
     loves: talk.loves,
     hates: talk.hates,
+    organizersMessages: talk.organizersThread.sort((p1, p2) => p1.date.seconds - p2.date.seconds).map(post => post.message)
   });
 
   return await Promise.all(talks.map(parseTalk));
@@ -451,6 +453,12 @@ const createProposalCard = async (list, proposal, board) => {
     list,
     idLabels
   );
+
+  if (proposal.organizersMessages && proposal.organizersMessages.length > 0) {
+    for (const organizersMessage of proposal.organizersMessages) {
+      await createTrelloComment(organizersMessage, card);
+    }
+  }
 };
 
 /**
