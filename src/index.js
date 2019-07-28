@@ -455,7 +455,7 @@ const createProposalCard = async (list, proposal, board) => {
   const proposalLink = `[Proposal](${proposalUrl})`;
   const votesLink = `[Votes](${proposalUrl}/score)`;
   const approveLink = `[APPROVE](${CFP_URL}/ar/preaccept/${proposal.id})`;
-  const cardDescription = `${proposalLink} • ${votesLink} • ⚠️ ${approveLink} ⚠️
+  const cardDescription = `${proposalLink} • ${votesLink} • ☢️ ${approveLink} ☢️
   
   ---
   
