@@ -311,8 +311,7 @@ const createDeliberationBoards = async (proposals, organization) => {
   const boards = [];
 
   for (const format of FORMATS) {
-    if (format.name === "Hands on lab")
-      boards.push(await createBoard(proposals, format, year, organization));
+    boards.push(await createBoard(proposals, format, year, organization));
   }
 
   return boards;
