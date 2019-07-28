@@ -5,7 +5,7 @@ export const authorize = () => {
   return new Promise((resolve, reject) => {
     window.Trello.authorize({
       type: "popup",
-      name: "CFP to Trello",
+      name: "BDX I/O - CFP to Trello",
       scope: {
         read: true,
         write: true
