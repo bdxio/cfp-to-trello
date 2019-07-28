@@ -4,21 +4,21 @@
 
 This application is used to import CFP proposals into Trello boards.
 
-For each type of proposals a dedicated Trello board is created.  
-All proposals are then grouped by track and split into three thirds, from top rated to lower rated.  
+For each format of proposals (conference, quickie or hands on lab) a dedicated Trello board is created.  
+All proposals are then grouped by categories and split into three thirds, from top rated to lower rated.  
 For each proposal a Trello card is created and put in a Trello list specific to its track and rating, for the first two thirds. All last third proposals are put together in another Trello list.
 
 ## Install
 
-You first need to download manually the JSON file containing all the proposals and their votes from the CFP.
-Log in to the CFP, go the URL <url cfp>/cfpadmin/allvotesJson and download the JSON result.
-Put the file in the [data](./data) directory and name it `allvotesJson.json`  
-**⚠️ DO NOT COMMIT THIS FILE EVER**
-
-You can now install the dependencies using [yarn]() :
+First install the dependencies using [yarn](https://yarnpkg.com):
 ```bash
 yarn
 ```
+
+You then need to download manually the JSON file containing all the proposals and their votes from the CFP.
+Log in to the CFP, go the proposals page and click on "Export...>JSON file".
+Put the file in the [data](./data) directory and name it `export.json`  
+**⚠️ DO NOT COMMIT THIS FILE EVER**
 
 ## Usage
 

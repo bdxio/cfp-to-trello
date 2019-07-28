@@ -1,8 +1,5 @@
 import "babel-polyfill";
-
 import { groupBy, keys, splitEvery } from "ramda";
-
-import allvotesJson from "../data/allvotesJson.json";
 import {
   authorize,
   getMe,
@@ -12,33 +9,97 @@ import {
   createTrelloLabel,
   createTrelloCard
 } from "./trello";
+import cfp from "../data/export.json";
 
 const BOARD_NAME_PREFIX = "Délibération";
 
-const BOARDS_TO_CREATE = [
-  {
-    name: "Conférences",
-    talkType: "conf"
-  },
-  {
-    name: "LTs",
-    talkType: "quick"
-  },
-  {
-    name: "Hands-on",
-    talkType: "lab"
-  }
-];
+/**
+ * Categories of talks (Design, Backend, Frontend...).
+ */
+const CATEGORIES = cfp.categories;
 
-const AUDIENCE_LEVELS = {
-  l1: "Pour tous niveaux",
-  l2: "Intermédiaire",
-  l3: "Expert"
+/**
+ * Some talks don't have category set, this map is used to fix it.
+ * Keys are talks title as the export doesn't include the id of the talk.
+ */
+const CATEGORIES_FIX = {
+  "Programmation fonctionnelle facile avec elm": "Front-end",
+  "Comment Elm a transformé mon expérience de développeur front-end": "Front-end",
+  "Une bonne expérience utilisateur pour protéger vos données, c’est possible": "Design & UX",
+  "COBOL et envahisseurs": "Back-end",
+  "Créez votre première extension VS Code": "Découverte",
+  "De Java à Go ": "Back-end",
+  "Concourse, des pipelines CI/CD pour \"l'ère cloud native\"": "Cloud & DevOps",
+  "Vers l'infini et au-delà avec Angular !": "Front-end",
 };
 
-const LANGS = { fr: "🇫🇷", en: "🇬🇧" };
+/**
+ * Formats of talks (Conférence, Quickie, Hands on lab...).
+ */
+const FORMATS = cfp.formats;
 
-const CFP_URL = "https://cfp.bdx.io";
+/**
+ * Some talks don't have format set, this map is used to fix it.
+ * Keys are talks title as the export doesn't include the id of the talk.
+ */
+const FORMATS_FIX = {
+  "Programmation fonctionnelle facile avec elm": "Hands on lab",
+  "Comment Elm a transformé mon expérience de développeur front-end": "Conférence",
+  "Le cloud et le devops au profit de mon poste de développement.": "Conférence",
+  "Des animations SVG en JS, cools et super rapides ? Bien sûr !": "Quickie",
+  "JAMstack, ou comment faire des sites statiques modernes et rapides": "Quickie",
+  "Améliorez votre façon de taper du code au quotidien": "Quickie",
+  "Commencez à bloguer dès aujourd'hui": "Quickie",
+  "Using Kubeflow Pipelines for building machine learning pipelines": "Conférence",
+  "Des conteneurs sans baleine": "Conférence",
+  "Chaine de fabrication Web, du développement au monitoring en production": "Conférence",
+  "Scripting en Go (15 min)": "Quickie",
+  "Du puzzle aux Légo, le périple de nos architectures logicielles": "Conférence",
+  "Du POC à la Prod, un projet de data science mis à nu ! ": "Conférence",
+  "De Java à Go ": "Quickie",
+  "DataScience from the trenches": "Conference",
+  "Développement et productivité à l’ère des infras cloud native: l’approche Eclipse Che": "Conférence",
+
+};
+
+/**
+ * List of speakers with at least one proposal.
+ */
+const SPEAKERS = cfp.speakers;
+
+const AUDIENCE_LEVELS = {
+  beginner: "Débutant",
+  intermediate: "Intermédiaire",
+  advanced: "Avancé"
+};  
+
+const LANGS = {
+  France: "🇫🇷",
+  French: "🇫🇷",
+  Français: "🇫🇷",
+  français: "🇫🇷",
+  Francais: "🇫🇷",
+  francais: "🇫🇷",
+  Fançais: "🇫🇷",
+  FR: "🇫🇷",
+  fr: "🇫🇷",
+  Fr: "🇫🇷",
+  french: "🇫🇷",
+  en: "🇬🇧",
+  English: "🇬🇧",
+  "English or French (any preferences?)": "🇫🇷/🇬🇧",
+  "French (preferred) or English": "🇫🇷/🇬🇧",
+  "Français / English?": "🇫🇷/🇬🇧",
+  "French (but can be in english)": "🇫🇷/🇬🇧",
+  "Français ou Anglais": "🇫🇷/🇬🇧",
+  "Français ou English": "🇫🇷/🇬🇧",
+  "FR or EN": "🇫🇷/🇬🇧",
+  "English or French": "🇬🇧/🇫🇷",
+  "Anglais (de préférence) ; Français (si nécessaire)": "🇬🇧/🇫🇷",
+};
+
+const CFP_URL = "https://conference-hall.io/organizer/event";
+const CFP_EVENT_ID = "TODO";
 
 /**
  * Function created when the document is loaded to display import progression.
@@ -69,7 +130,7 @@ const run = async () => {
   const scrollTextAreaInterval = setInterval(scrollTextArea, 50, txtOutput);
 
   try {
-    const proposals = parseProposalsVotes(allvotesJson);
+    const proposals = await parseTalks(cfp.talks);
     log(`There are ${proposals.length} proposals to import...`);
 
     await authorize();
@@ -127,52 +188,100 @@ const createBoardUrlText = board => {
 };
 
 /**
- * Parses the list of proposal votes to retain only the information needed to create the cards in Trello.
+ * Parses the list of talks to retain only the information needed to create the cards in Trello.
  *
  * @param {Array[proposalsVotes]} proposalsVotes The list of proposals associated to their votes given by the CFP application
  */
-const parseProposalsVotes = proposalsVotes => {
-  // Transforms a speaker object in a string containing his full name and his company
-  const mapSpeaker = speaker => {
-    let speakerLabel = `${speaker.firstName} ${speaker.name}`;
-    // Speaker from the Gironde area should be identified clearly, a glass of wine should do the trick
-    if (speaker.zipCode.startsWith("33")) speakerLabel += " 🍷";
+const parseTalks = async (talks) => {
+  // Transforms a speaker in a string containing his full name and his company
+  const parseSpeaker = async speakerUid => {
+    const speaker = SPEAKERS.find(speaker => speaker.uid === speakerUid);
+    let speakerLabel = `${speaker.displayName} -`;
+    if (speaker.address && speaker.address.latLng) {
+      try {
+        const location = await findLocation(speaker.address);
+        speakerLabel += ` ${location.city}`;
+        // Speaker from the Gironde area should be identified clearly, a glass of wine should do the trick
+        if (location.zipCode.startsWith("33")) speakerLabel += " 🍷";
+      } catch (e) {
+        console.error(e);
+      }
+    } else {
+      speakerLabel += " 🗺️";
+    }
     if (speaker.company) speakerLabel += ` (${speaker.company})`;
 
     return speakerLabel;
   };
 
-  // Function computing the standard deviation (it seems the one given by the CFP is wrong)
-  const computeStdDeviation = (average, voters) => {
-    // We transform the voters in score and we filter out scores equals to 0 as they represent an absention
-    const scores = voters.map(voter => voter.score).filter(score => score > 0);
-    const squaredDifferences = scores
-      .map(score => score - average)
-      .map(n => n * n);
-    const sumSquaredDifferences = squaredDifferences.reduce(
-      (sum, n) => sum + n
-    );
-    const squaredDifferencesAverage = sumSquaredDifferences / scores.length;
+  const parseSpeakers = async (speakers) => {
+    return await Promise.all(speakers.map(speaker => parseSpeaker(speaker)));
+  }
 
-    return Math.sqrt(squaredDifferencesAverage);
+  const parseLanguage = ({ language }) => {
+    // Language can be null or undefined, in this case we use FR as default
+    const lang = language ? LANGS[language.trim()] : LANGS.FR;
+    if (!lang) console.error(`${language} is not a known language!`);
+    return lang ? lang : `🙊 (${language})`;
   };
 
-  return proposalsVotes.map(({ proposal, votes }) => ({
-    id: proposal.id,
-    title: proposal.title,
-    talkType: proposal.talkType,
-    track: proposal.track,
-    summary: proposal.summary,
-    audienceLevel: AUDIENCE_LEVELS[proposal.audienceLevel],
-    lang: LANGS[proposal.lang],
-    speakers: proposal.allSpeakers.map(mapSpeaker).join(" / "),
-    privateMessage: proposal.privateMessage,
-    liveCoding: proposal.liveCoding,
-    average: votes.average,
-    totalVoters: votes.totalVoters,
-    // average has 3 decimal places so we do the same for the standard deviation
-    stdDeviation: computeStdDeviation(votes.average, votes.voters).toFixed(3)
-  }));
+  const parseCategory = ({ categories: categoryId, title: talkTitle }) => {
+    if (!categoryId) {
+      const categoryName = CATEGORIES_FIX[talkTitle];
+      if (!categoryName) throw `A category fix is needed for talk "${talkTitle}"`;
+      return categoryName;
+    }
+    const category = CATEGORIES.find(category => category.id === categoryId);
+    return category ? category.name : "NO CATEGORY";
+  }
+
+  const parseFormat = ({ formats: formatId, title: talkTitle }) => {
+    if (!formatId) {
+      const formatName = FORMATS_FIX[talkTitle];
+      if (!formatName) throw `A format fix is needed for talk "${talkTitle}"`;
+      return formatName;
+    }
+    const format = FORMATS.find(format => format.id === formatId);
+    return format ? format.name : "NO FORMAT";
+  };
+
+  const parseTalk = async (talk) => ({
+    id: talk.uid,
+    title: talk.title,
+    category: parseCategory(talk),
+    format: parseFormat(talk),
+    abstract: talk.abstract,
+    audienceLevel: AUDIENCE_LEVELS[talk.level],
+    lang: parseLanguage(talk),
+    speakers: (await parseSpeakers(talk.speakers)).join(" / "),
+    privateMessage: talk.comments,
+    average: Number(talk.rating).toFixed(2),
+    loves: talk.loves,
+    hates: talk.hates,
+  });
+
+  return await Promise.all(talks.map(parseTalk));
+};
+
+const findLocation = async ({ latLng: { lat, lng: lon } } = {} ) => {
+  const request = `https://geo.api.gouv.fr/communes?lat=${lat}&lon=${lon}&fields=codesPostaux&format=json&geometry=centre`;
+  const response = await fetch(request);
+  if (response.ok) {
+    const json = await response.json();
+    if (json[0]) {
+      return {
+        city: json[0].nom,
+        zipCode: json[0].codesPostaux[0],
+      };
+    } else {
+      console.error(`no location found for coordinates ${lat},${lon}!`);
+      return {
+        city: "🗺️",
+        zipCode: "00000",
+      };
+    }
+  }
+  throw `unable to find zip code for coordinates ${lat}/${lon}!`;
 };
 
 /**
@@ -186,8 +295,8 @@ const createDeliberationBoards = async (proposals, organization) => {
   const year = new Date().getFullYear();
   const boards = [];
 
-  for (const { name, talkType } of BOARDS_TO_CREATE) {
-    boards.push(await createBoard(proposals, name, talkType, year, organization));
+  for (const format of FORMATS) {
+    if (format.name === "Hands on lab") boards.push(await createBoard(proposals, format, year, organization));
   }
 
   return boards;
@@ -197,19 +306,17 @@ const createDeliberationBoards = async (proposals, organization) => {
  * Creates the Trello board for all proposals of a given type and returns it.
  *
  * @param {Array<Proposal>} proposals The list of all proposals
- * @param {String} name The name of the board to create
- * @param {"conf" | "quick" | "lab"} talkType The type of the talk for which to create the board
+ * @param format The format of the board to create (Quickie, Conférence or Hands on lab)
+ * @param {String} format The format of the talk for which to create the board
  * @param {Number} year The year of the conference (usually the current year)
  * @param {String} organization The origanization in which the board should be created
  * @returns {TrelloBoard} The Trello board created
  */
-const createBoard = async (proposals, name, talkType, year, organization) => {
+const createBoard = async (proposals, format, year, organization) => {
   // We keep only proposal of the given type
-  const boardProposals = proposals.filter(
-    proposal => proposal.talkType === talkType
-  );
+  const boardProposals = proposals.filter(proposal => proposal.format === format.name);
 
-  const boardName = `${BOARD_NAME_PREFIX} ${year} - ${name}`;
+  const boardName = `${BOARD_NAME_PREFIX} ${year} - ${format.name}`;
   log(
     `Creating the board ${boardName} for ${boardProposals.length} proposals...`
   );
@@ -232,15 +339,15 @@ const createBoard = async (proposals, name, talkType, year, organization) => {
  * @param {Array[Proposal]} proposals The proposals to add to the Trello board
  */
 const createDeliberationLists = async (board, proposals) => {
-  const proposalsByTrack = groupBy(proposal => proposal.track, proposals);
-  const tracks = keys(proposalsByTrack).sort();
+  const proposalsByCategory = groupBy(proposal => proposal.category, proposals);
+  const categories = keys(proposalsByCategory).sort();
 
   const lastThirdProposals = [];
-  for (const track of tracks) {
-    const remainingProposals = await createTrackDeliberationLists(
+  for (const category of categories) {
+    const remainingProposals = await createCategoryDeliberationLists(
       board,
-      track,
-      proposalsByTrack[track]
+      category,
+      proposalsByCategory[category]
     );
     if (remainingProposals && remainingProposals.length > 0) {
       lastThirdProposals.push(...remainingProposals);
@@ -251,14 +358,14 @@ const createDeliberationLists = async (board, proposals) => {
 };
 
 /**
- * Creates the Trello lists for a given track.
- * Two Trello lists are created, in which are added the two-thirds best proposals, the last third are returned to be put in a common Trello list with proposals from the other tracks.
+ * Creates the Trello lists for a given category.
+ * Two Trello lists are created, in which are added the two-thirds best proposals, the last third are returned to be put in a common Trello list with proposals from the other categories.
  *
  * @param {TrelloBoard} board The board hosting the deliberation lists
- * @param {String} track The track of the proposals
- * @param {Array[Proposal]} proposals The list of the proposals for the track
+ * @param {String} category The category of the proposals
+ * @param {Array[Proposal]} proposals The list of the proposals for the category
  */
-const createTrackDeliberationLists = async (board, track, proposals) => {
+const createCategoryDeliberationLists = async (board, category, proposals) => {
   const sortedProposals = proposals.sort((p1, p2) => p2.average - p1.average);
   // Proposals are splitted into three lists
   const thirdSize = Math.ceil(sortedProposals.length / 3);
@@ -266,14 +373,17 @@ const createTrackDeliberationLists = async (board, track, proposals) => {
 
   await createDeliberationList(
     board,
-    `${track} - T1`,
+    `${category} - T1`,
     sortedProposalsSplitted[0]
   );
-  await createDeliberationList(
-    board,
-    `${track} - T2`,
-    sortedProposalsSplitted[1]
-  );
+
+  if (sortedProposalsSplitted[1] && sortedProposalsSplitted[1].length > 0) {
+    await createDeliberationList(
+      board,
+      `${category} - T2`,
+      sortedProposalsSplitted[1]
+    );
+  }
 
   return sortedProposalsSplitted[2];
 };
@@ -306,22 +416,19 @@ const createProposalCard = async (list, proposal, board) => {
   log(`Creating card for proposal ${proposal.title}...`);
 
   const idLabels = [];
-  idLabels.push(await createLabel(proposal.track, board, "green"));
+  idLabels.push(await createLabel(proposal.category, board, "green"));
   idLabels.push(
     await createLabel(
-      `avg:${proposal.average} (${proposal.totalVoters})`,
+      `avg: ${proposal.average}`,
       board,
       "orange"
     )
   );
   idLabels.push(
-    await createLabel(`dev:${proposal.stdDeviation}`, board, "red")
+    await createLabel(`${proposal.loves} ❤️ / ${proposal.hates} ☠️`, board, "red")
   );
   idLabels.push(await createLabel(proposal.speakers, board, "purple"));
   idLabels.push(await createLabel(proposal.audienceLevel, board, "sky"));
-  if (proposal.liveCoding) {
-    idLabels.push(await createLabel("⌨️", board, "lime"));
-  }
   idLabels.push(await createLabel(proposal.lang, board, "pink"));
 
   const proposalUrl = `${CFP_URL}/cfpadmin/proposal/${proposal.id}`;
@@ -332,7 +439,7 @@ const createProposalCard = async (list, proposal, board) => {
   
   ---
   
-  ${proposal.summary}
+  ${proposal.abstract}
   
   ---
   
