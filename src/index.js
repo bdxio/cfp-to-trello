@@ -257,13 +257,18 @@ const parseTalks = async talks => {
     return format ? format.name : "NO FORMAT";
   };
 
+  const parseLevel = ({ level }) => {
+    const audienceLevel = AUDIENCE_LEVELS[level];
+    return audienceLevel ? audienceLevel : AUDIENCE_LEVELS.beginner;
+  };
+
   const parseTalk = async talk => ({
     id: talk.uid,
     title: talk.title,
     category: parseCategory(talk),
     format: parseFormat(talk),
     abstract: talk.abstract,
-    audienceLevel: AUDIENCE_LEVELS[talk.level],
+    audienceLevel: parseLevel(talk),
     lang: parseLanguage(talk),
     speakers: (await parseSpeakers(talk.speakers)).join(" / "),
     privateMessage: talk.comments,
