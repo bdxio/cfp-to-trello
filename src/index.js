@@ -148,9 +148,7 @@ const run = async () => {
 
     const organization = await getOrganization(organizationName);
     log(
-      `Deliberation boards will be created for the organization ${
-        organization.displayName
-      }...`
+      `Deliberation boards will be created for the organization ${organization.displayName}...`
     );
 
     const boards = await createDeliberationBoards(proposals, organization);
@@ -160,9 +158,7 @@ const run = async () => {
     performance.measure("trello-import", "trello-import-start");
     const measure = performance.getEntriesByName("trello-import")[0];
     log(
-      `${proposals.length} proposals successfully imported in Trello in ${
-        measure.duration
-      } ms 😎🚀🍾`
+      `${proposals.length} proposals successfully imported in Trello in ${measure.duration} ms 😎🚀🍾`
     );
     scrollTextArea(txtOutput);
   } catch (e) {
@@ -193,9 +189,7 @@ const createBoardsParagraph = boards => {
  * @returns {TextNode} The text containing the information about the created board
  */
 const createBoardUrlText = board => {
-  return `Le board ${board.name} a bien été créé : <a href="${
-    board.shortUrl
-  }" target="_blank">${board.shortUrl}</a>`;
+  return `Le board ${board.name} a bien été créé : <a href="${board.shortUrl}" target="_blank">${board.shortUrl}</a>`;
 };
 
 /**
