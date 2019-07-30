@@ -201,7 +201,8 @@ const parseTalks = async talks => {
   // Transforms a speaker in a string containing his full name and his company
   const parseSpeaker = async speakerUid => {
     const speaker = SPEAKERS.find(speaker => speaker.uid === speakerUid);
-    let speakerLabel = `${speaker.displayName} -`;
+    const speakerName = speaker.displayName || speaker.email || "👻";
+    let speakerLabel = `${speakerName} -`;
     if (speaker.address && speaker.address.latLng) {
       try {
         const location = await findLocation(speaker.address);
@@ -215,7 +216,7 @@ const parseTalks = async talks => {
       speakerLabel += " 🗺️";
     }
     if (speaker.company) speakerLabel += ` (${speaker.company})`;
-
+    
     return speakerLabel;
   };
 
