@@ -107,8 +107,12 @@ const LANGS = {
   "Anglais (de préférence) ; Français (si nécessaire)": "🇬🇧/🇫🇷"
 };
 
-const CFP_URL = "https://conference-hall.io/organizer/event";
-const CFP_EVENT_ID = "TODO";
+const CFP_URL = "https://conference-hall.io";
+
+/**
+ * eventId defined in Conference Hall (used to generate URLs for proposals).
+ */
+let eventId;
 
 /**
  * Function created when the document is loaded to display import progression.
@@ -126,7 +130,13 @@ let clearLog;
 const run = async () => {
   const organizationName = document.getElementById("txt-organization").value;
   if (organizationName == null || organizationName.trim() == "") {
-    window.alert("The name of the Trello organization is required");
+    window.alert("The name of the Trello organization is required!");
+    return;
+  }
+
+  eventId = document.getElementById("txt-eventId").value;
+  if (eventId == null || eventId.trim() == "") {
+    window.alert("The event ID of Conference Hall is required!");
     return;
   }
 
@@ -216,7 +226,7 @@ const parseTalks = async talks => {
       speakerLabel += " 🗺️";
     }
     if (speaker.company) speakerLabel += ` (${speaker.company})`;
-    
+
     return speakerLabel;
   };
 
@@ -258,7 +268,7 @@ const parseTalks = async talks => {
   };
 
   const parseTalk = async talk => ({
-    id: talk.uid,
+    id: talk.id,
     title: talk.title,
     category: parseCategory(talk),
     format: parseFormat(talk),
@@ -446,11 +456,9 @@ const createProposalCard = async (list, proposal, board) => {
   idLabels.push(await createLabel(proposal.audienceLevel, board, "sky"));
   idLabels.push(await createLabel(proposal.lang, board, "pink"));
 
-  const proposalUrl = `${CFP_URL}/cfpadmin/proposal/${proposal.id}`;
-  const proposalLink = `[Proposal](${proposalUrl})`;
-  const votesLink = `[Votes](${proposalUrl}/score)`;
-  const approveLink = `[APPROVE](${CFP_URL}/ar/preaccept/${proposal.id})`;
-  const cardDescription = `${proposalLink} • ${votesLink} • ☢️ ${approveLink} ☢️
+  const proposalUrl = `${CFP_URL}/organizer/event/${eventId}/proposal/${proposal.id}`;
+  const proposalLink = `📜 [Proposal](${proposalUrl})`;
+  const cardDescription = `${proposalLink}
   
   ---
   
