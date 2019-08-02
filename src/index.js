@@ -458,6 +458,7 @@ const createProposalCard = async (list, proposal, board) => {
 
   const proposalUrl = `${CFP_URL}/organizer/event/${eventId}/proposal/${proposal.id}`;
   const proposalLink = `📜 [Proposal](${proposalUrl})`;
+  const privateMessage = proposal.privateMessage ? proposal.privateMessage : "";
   const cardDescription = `${proposalLink}
   
   ---
@@ -466,7 +467,7 @@ const createProposalCard = async (list, proposal, board) => {
   
   ---
   
-  ${proposal.privateMessage}`;
+  ${privateMessage}`;
 
   const card = await createTrelloCard(
     proposal.title,
