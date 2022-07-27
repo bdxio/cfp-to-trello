@@ -252,7 +252,7 @@ const parseTalks = async talks => {
     hates: talk.hates,
     organizersMessages: talk.organizersThread
       .sort((p1, p2) => p1.date.seconds - p2.date.seconds)
-      .map(post => post.message)
+      .map(post => `${post.message}\n--\n**${post.displayName}**`)
   });
 
   return await Promise.all(talks.map(parseTalk));
