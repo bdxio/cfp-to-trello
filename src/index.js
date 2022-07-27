@@ -21,19 +21,10 @@ const CATEGORIES = cfp.categories;
 
 /**
  * Some talks don't have category set, this map is used to fix it.
- * Keys are talks title as the export doesn't include the id of the talk.
+ * Key is the talk title as the export doesn't include the id of the talk,
+ * value is the category the talk should be assigned to (see categories in JSON export).
  */
 const CATEGORIES_FIX = {
-  "Programmation fonctionnelle facile avec elm": "Front-end",
-  "Comment Elm a transformé mon expérience de développeur front-end":
-    "Front-end",
-  "Une bonne expérience utilisateur pour protéger vos données, c’est possible":
-    "Design & UX",
-  "COBOL et envahisseurs": "Back-end",
-  "Créez votre première extension VS Code": "Découverte",
-  "De Java à Go ": "Back-end",
-  'Concourse, des pipelines CI/CD pour "l\'ère cloud native"': "Cloud & DevOps",
-  "Vers l'infini et au-delà avec Angular !": "Front-end"
 };
 
 /**
@@ -43,32 +34,10 @@ const FORMATS = cfp.formats;
 
 /**
  * Some talks don't have format set, this map is used to fix it.
- * Keys are talks title as the export doesn't include the id of the talk.
+ * Key is the talk title as the export doesn't include the id of the talk,
+ * value is the format the talk should be assigned to (see formats in JSON export).
  */
 const FORMATS_FIX = {
-  "Programmation fonctionnelle facile avec elm": "Hands on lab",
-  "Comment Elm a transformé mon expérience de développeur front-end":
-    "Conférence",
-  "Le cloud et le devops au profit de mon poste de développement.":
-    "Conférence",
-  "Des animations SVG en JS, cools et super rapides ? Bien sûr !": "Quickie",
-  "JAMstack, ou comment faire des sites statiques modernes et rapides":
-    "Quickie",
-  "Améliorez votre façon de taper du code au quotidien": "Quickie",
-  "Commencez à bloguer dès aujourd'hui": "Quickie",
-  "Using Kubeflow Pipelines for building machine learning pipelines":
-    "Conférence",
-  "Des conteneurs sans baleine": "Conférence",
-  "Chaine de fabrication Web, du développement au monitoring en production":
-    "Conférence",
-  "Scripting en Go (15 min)": "Quickie",
-  "Du puzzle aux Légo, le périple de nos architectures logicielles":
-    "Conférence",
-  "Du POC à la Prod, un projet de data science mis à nu ! ": "Conférence",
-  "De Java à Go ": "Quickie",
-  "DataScience from the trenches": "Conference",
-  "Développement et productivité à l’ère des infras cloud native: l’approche Eclipse Che":
-    "Conférence"
 };
 
 /**
@@ -104,7 +73,8 @@ const LANGS = {
   "Français ou English": "🇫🇷/🇬🇧",
   "FR or EN": "🇫🇷/🇬🇧",
   "English or French": "🇬🇧/🇫🇷",
-  "Anglais (de préférence) ; Français (si nécessaire)": "🇬🇧/🇫🇷"
+  "Anglais (de préférence) ; Français (si nécessaire)": "🇬🇧/🇫🇷",
+  "Frafra": "🇫🇷",
 };
 
 const CFP_URL = "https://conference-hall.io";
