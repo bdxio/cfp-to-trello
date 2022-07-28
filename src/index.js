@@ -237,6 +237,13 @@ const parseTalks = async talks => {
     return audienceLevel ? audienceLevel : AUDIENCE_LEVELS.beginner;
   };
 
+  const parseRating = ({ rating }) => {
+    if (rating == null) {
+      return "N/A";
+    }
+    return Number(rating).toFixed(2);
+  }
+
   const parseTalk = async talk => ({
     id: talk.id,
     title: talk.title,
@@ -247,9 +254,9 @@ const parseTalks = async talks => {
     lang: parseLanguage(talk),
     speakers: (await parseSpeakers(talk.speakers)).join(" / "),
     privateMessage: talk.comments,
-    average: Number(talk.rating).toFixed(2),
-    loves: talk.loves,
-    hates: talk.hates,
+    average: parseRating(talk),
+    loves: talk.loves === undefined ? "N/A" : talk.loves,
+    hates: talk.hates === undefined ? "N/A" : talk.hates,
     organizersMessages: talk.organizersThread
       .sort((p1, p2) => p1.date.seconds - p2.date.seconds)
       .map(post => `${post.message}\n--\n**${post.displayName}**`)
