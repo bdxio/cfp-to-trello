@@ -265,7 +265,7 @@ const parseTalks = async talks => {
   return await Promise.all(talks.map(parseTalk));
 };
 
-const findLocation = async ({ latLng: { lat, lng: lon } } = {}) => {
+const findLocation = async ({ formattedAddress, latLng: { lat, lng: lon } } = {}) => {
   const request = `https://geo.api.gouv.fr/communes?lat=${lat}&lon=${lon}&fields=codesPostaux&format=json&geometry=centre`;
   const response = await fetch(request);
   if (response.ok) {
@@ -278,7 +278,7 @@ const findLocation = async ({ latLng: { lat, lng: lon } } = {}) => {
     } else {
       console.error(`no location found for coordinates ${lat},${lon}!`);
       return {
-        city: "🗺️",
+        city: `🗺️  ${formattedAddress}`,
         zipCode: "00000"
       };
     }
