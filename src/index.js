@@ -370,8 +370,18 @@ const createDeliberationLists = async (board, proposals) => {
  * @param {Array[Proposal]} proposals The list of the proposals for the category
  */
 const createCategoryDeliberationLists = async (board, category, proposals) => {
-  const sortedProposals = proposals.sort((p1, p2) => p2.average - p1.average);
-  // Proposals are splitted into three lists
+  const sortedProposals = proposals.sort((p1, p2) => {
+    if (p1.average === "N/A") {
+      return 1;
+    }
+    if (p2.average === "N/A") {
+      return -1;
+    }
+    const avg1 = parseFloat(p1.average);
+    const avg2 = parseFloat(p2.average);
+    return avg2 - avg1;
+  });
+  // Proposals are split into three lists
   const thirdSize = Math.ceil(sortedProposals.length / 3);
   const sortedProposalsSplitted = splitEvery(thirdSize, sortedProposals);
 
