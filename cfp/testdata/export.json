@@ -1,0 +1,350 @@
+{
+  "name": "Awesome Conference 2042",
+  "categories": [
+    {
+      "id": "9305ab5c-0018-459a-a81a-d1be5ee837e3",
+      "name": "Category 1",
+      "description": "The first category"
+    },
+    {
+      "id": "d4e1440f-5238-4b72-83b8-4d837d759d21",
+      "name": "Category 2",
+      "description": "The second category"
+    }
+  ],
+  "formats": [
+    {
+      "description": "The first format",
+      "id": "46174594-4909-4a2b-9608-265a3dafba2c",
+      "name": "Format 1"
+    },
+    {
+      "name": "Format 2",
+      "description": "The second format",
+      "id": "6cf4e5d8-7ce4-4921-a2ba-73bbfb184744"
+    }
+  ],
+  "address": {
+    "timezone": null,
+    "latLng": {
+      "lng": 0,
+      "lat": 0
+    },
+    "locality": {
+      "long_name": "Null Island",
+      "short_name": "Null Island"
+    },
+    "country": {
+      "long_name": "Null Island",
+      "short_name": "NIL"
+    },
+    "formattedAddress": "Null Island"
+  },
+  "conferenceDates": {
+    "start": "2042-01-01T23:00:00.000Z",
+    "end": "2042-01-02T23:00:00.000Z"
+  },
+  "talks": [
+    {
+      "id": "6grkSZ4ArcYr8BZfcw0o",
+      "title": "A beginner talk in category 1",
+      "state": "submitted",
+      "level": "beginner",
+      "abstract": "An interesting abstract",
+      "categories": "9305ab5c-0018-459a-a81a-d1be5ee837e3",
+      "formats": "46174594-4909-4a2b-9608-265a3dafba2c",
+      "speakers": [
+        "36b1q9Gmf991813CmMlxUl22okOc"
+      ],
+      "references": "Some references",
+      "rating": 2.6666666666666665,
+      "loves": 0,
+      "hates": 0,
+      "language": "French",
+      "organizersThread": []
+    },
+    {
+      "id": "tsVw51wQQatiEsWzmWfx",
+      "title": "Another beginner talk in category 1",
+      "state": "accepted",
+      "level": "beginner",
+      "abstract": "An interesting abstract",
+      "categories": "9305ab5c-0018-459a-a81a-d1be5ee837e3",
+      "formats": "46174594-4909-4a2b-9608-265a3dafba2c",
+      "speakers": [
+        "GrYZaZE7yoEQdm20M2mS6MD0xTCk"
+      ],
+      "comments": "Speaker with no company and some organizers threads",
+      "references": "Some references",
+      "rating": 3.4,
+      "loves": 0,
+      "hates": 0,
+      "language": "français",
+      "organizersThread": [
+        {
+          "id": "f7vO3iGFmiIUwZupsqht",
+          "message": "Second message from another organizer",
+          "date": {
+            "_seconds": 1659606416,
+            "_nanoseconds": 655000000
+          },
+          "displayName": "Orga Two",
+          "uid": "LmHuAmQ4cbPgeSRPJHi9AsHpABDA",
+          "photoURL": "photoURL"
+        },
+        {
+          "id": "f7vO3iGFmiIUwZupsqht",
+          "message": "First message from an organizer",
+          "photoURL": "photoURL",
+          "date": {
+            "_seconds": 1659606248,
+            "_nanoseconds": 839000000
+          },
+          "displayName": "Orga One",
+          "uid": "CN537Jg6sKJ4NlMIYdGhFIWHuxoL"
+        }
+      ]
+    },
+    {
+      "id": "bSKbIciG4jCWk37vrTEp",
+      "title": "An intermediate talk in category 1",
+      "state": "submitted",
+      "level": "intermediate",
+      "abstract": "An interesting abstract",
+      "categories": "9305ab5c-0018-459a-a81a-d1be5ee837e3",
+      "formats": "46174594-4909-4a2b-9608-265a3dafba2c",
+      "speakers": [
+        "96ln785IpwmM2afaqqFBGSVmjKW3"
+      ],
+      "comments": "Speaker without address",
+      "references": "Some references",
+      "rating": 3.4,
+      "loves": 1,
+      "hates": 0,
+      "language": "Frafra",
+      "organizersThread": []
+    },
+    {
+      "id": "Hj2ZNh7ydvOnpg9TBHeL",
+      "title": "An advanced talk in category 1",
+      "state": "submitted",
+      "level": "advanced",
+      "abstract": "An interesting abstract",
+      "categories": "9305ab5c-0018-459a-a81a-d1be5ee837e3",
+      "formats": "46174594-4909-4a2b-9608-265a3dafba2c",
+      "speakers": [
+        "yqK3HZYg9bGB69srs1Co5c9MTpA9"
+      ],
+      "comments": "Speaker from another country",
+      "references": "Some references",
+      "rating": 4.123,
+      "loves": 0,
+      "hates": 0,
+      "language": "English",
+      "organizersThread": []
+    },
+    {
+      "id": "kZvDMmIaTnrFxGjJycqx",
+      "title": "A talk in category 1",
+      "state": "submitted",
+      "level": "advanced",
+      "abstract": "An interesting abstract",
+      "categories": "9305ab5c-0018-459a-a81a-d1be5ee837e3",
+      "formats": "46174594-4909-4a2b-9608-265a3dafba2c",
+      "speakers": [
+        "36b1q9Gmf991813CmMlxUl22okOc",
+        "GrYZaZE7yoEQdm20M2mS6MD0xTCk"
+      ],
+      "comments": "Two speakers and multiple languages",
+      "references": "Some references",
+      "rating": 3.25,
+      "loves": 0,
+      "hates": 0,
+      "language": "English or French (any preferences?)",
+      "organizersThread": []
+    },
+    {
+      "id": "tzdLHxKDtVUXcJLd66TN",
+      "title": "A talk in category 2",
+      "state": "submitted",
+      "level": "advanced",
+      "abstract": "An interesting abstract",
+      "categories": "d4e1440f-5238-4b72-83b8-4d837d759d21",
+      "formats": "46174594-4909-4a2b-9608-265a3dafba2c",
+      "speakers": [
+        "36b1q9Gmf991813CmMlxUl22okOc",
+        "96ln785IpwmM2afaqqFBGSVmjKW3"
+      ],
+      "comments": "Two speakers, one without address",
+      "references": "Some references",
+      "rating": 4.123,
+      "loves": 2,
+      "hates": 1,
+      "language": "French",
+      "organizersThread": []
+    },
+    {
+      "id": "dghzra8K2TfMYnBDjUEb",
+      "title": "Another talk in category 2",
+      "state": "submitted",
+      "level": "advanced",
+      "abstract": "An interesting abstract",
+      "categories": "d4e1440f-5238-4b72-83b8-4d837d759d21",
+      "formats": "46174594-4909-4a2b-9608-265a3dafba2c",
+      "speakers": [
+        "36b1q9Gmf991813CmMlxUl22okOc",
+        "GrYZaZE7yoEQdm20M2mS6MD0xTCk",
+        "opAQZOng2Y4MlKTavkS3wD6JnFmU"
+      ],
+      "comments": "Three speakers",
+      "references": "Some references",
+      "rating": 4.123,
+      "loves": 2,
+      "hates": 0,
+      "language": "French",
+      "organizersThread": []
+    },
+    {
+      "id": "xdUotyrnjlJ0XiIUZasR",
+      "title": "Still another talk in category 2",
+      "state": "submitted",
+      "level": "beginner",
+      "abstract": "An interesting abstract",
+      "categories": "d4e1440f-5238-4b72-83b8-4d837d759d21",
+      "formats": "46174594-4909-4a2b-9608-265a3dafba2c",
+      "speakers": [
+        "36b1q9Gmf991813CmMlxUl22okOc",
+        "96ln785IpwmM2afaqqFBGSVmjKW3",
+        "yqK3HZYg9bGB69srs1Co5c9MTpA9"
+      ],
+      "comments": "Three speakers, one without address and one from another country",
+      "references": "Some references",
+      "rating": 1.5,
+      "loves": 0,
+      "hates": 3,
+      "language": "French",
+      "organizersThread": []
+    }
+  ],
+  "speakers": [
+    {
+      "uid": "36b1q9Gmf991813CmMlxUl22okOc",
+      "displayName": "Leala Simard",
+      "bio": "Dev 1",
+      "speakerReferences": "https://www.reference1.com\n\nhttps://www.reference2.com",
+      "company": "Gold Medal",
+      "photoURL": "https://www.avatars.com/u/764359",
+      "twitter": "https://twitter.com/LealaSimard",
+      "github": "https://github.com/lealasimard (almost inactive)",
+      "address": {
+        "latLng": {
+          "lat": 43.950014,
+          "lng": 5.132784
+        },
+        "locality": {
+          "short_name": "Carpentras",
+          "long_name": "Carpentras"
+        },
+        "country": {
+          "short_name": "FR",
+          "long_name": "France"
+        },
+        "timezone": null,
+        "formattedAddress": "Carpentras, France"
+      },
+      "language": "French, English",
+      "email": "LealaSimard@dayrep.com"
+    },
+    {
+      "uid": "GrYZaZE7yoEQdm20M2mS6MD0xTCk",
+      "displayName": "Kari Angélil",
+      "bio": "Dev with no company",
+      "speakerReferences": "Speaker since I'm 18",
+      "photoURL": "https://www.avatars.com/u/16757",
+      "twitter": "@kariangelil",
+      "github": "kariangelil",
+      "address": {
+        "formattedAddress": "Muret, France",
+        "timezone": null,
+        "country": {
+          "long_name": "France",
+          "short_name": "FR"
+        },
+        "locality": {
+          "long_name": "Muret",
+          "short_name": "Muret"
+        },
+        "latLng": {
+          "lat": 1.390804,
+          "lng": 43.367307
+        }
+      },
+      "language": "English, French",
+      "email": "KariAngelil@teleworm.us",
+      "phone": "+33623331330"
+    },
+    {
+      "uid": "opAQZOng2Y4MlKTavkS3wD6JnFmU",
+      "displayName": "Anne Course",
+      "bio": "Dev with null company",
+      "speakerReferences": "**Go there**",
+      "company": null,
+      "photoURL": "https://pbs.twimg.com/profile_images/2377622869/pic.jpg",
+      "twitter": "@annecourse",
+      "github": "https://github.com/annecourse",
+      "address": {
+        "locality": {
+          "long_name": "Lormont",
+          "short_name": "Lormont"
+        },
+        "country": {
+          "long_name": "France",
+          "short_name": "FR"
+        },
+        "latLng": {
+          "lng": -0.613579,
+          "lat": 44.786423
+        },
+        "formattedAddress": "Lormont, France"
+      },
+      "language": "FRENCH",
+      "email": "AnneCourse@dayrep.com",
+      "phone": "+33617072254"
+    },
+    {
+      "uid": "96ln785IpwmM2afaqqFBGSVmjKW3",
+      "displayName": "Benjamin Salois",
+      "bio": "Dev with no address",
+      "speakerReferences": "- **Java à la vitesse de la lumière grâce au Graal !** (20min) joué au JUG Summer Camp 2021 (https://youtu.be/XFJ4-yNdTbs) et DevFest Nantes 2021 (https://www.youtube.com/watch?v=H804HU87gOQ)\n- **REX DotJS 2019** : joué à NantesJS en pair avec Adrien Lasselle (https://www.youtube.com/watch?v=KD7rj2puboc)\n- **Strapi ou comment créer un backend complet en 10min** : joué en SFEIR Lunch\n- **REX migration Java 6-8 vers Java 11** : joué en interne chez SII un midi (25-30 personnes); joué chez client pour des équipes de développement (30-40 personnes)\n\n- plusieurs talks données en meetup interne chez SFEIR (formats 20min et 5min)",
+      "company": "Wealthy Ideas",
+      "photoURL": "https://lh3.googleusercontent.com/30842/13538/23600/12338/photo.jpg",
+      "language": "Java, Javascript",
+      "email": "BenjaminSalois@teleworm.us"
+    },
+    {
+      "uid": "yqK3HZYg9bGB69srs1Co5c9MTpA9",
+      "displayName": "Dev from UK",
+      "company": "Big Bear Stores",
+      "photoURL": "https://lh3.googleusercontent.com/a-/Utoak1Ts2vpRaxj45XgyKNZXhhbUlYfeZqrPNMrZY=z69-q",
+      "address": {
+        "country": {
+          "short_name": "GB",
+          "long_name": "United Kingdom"
+        },
+        "latLng": {
+          "lat": 51.791437,
+          "lng": -4.735917
+        },
+        "formattedAddress": "Loveston, UK",
+        "timezone": null,
+        "locality": {
+          "short_name": "Loveston",
+          "long_name": "Loveston"
+        }
+      },
+      "language": "English, French",
+      "email": "AnthonyWoods@teleworm.us",
+      "phone": "+44 (0) 7804 652425"
+    }
+  ]
+}

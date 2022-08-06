@@ -1,5 +1,2 @@
-.cache/
-!data/README.md
-data/
-dist/
-node_modules/
+.idea/
+cfp-to-trello
