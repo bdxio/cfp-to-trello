@@ -1,10 +1,13 @@
 package trello
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"html"
+	"io"
 	"log"
 	"net"
 	"net/http"
@@ -17,6 +20,54 @@ import (
 
 	"github.com/bdxio/cfp-to-trello/common"
 )
+
+// Constants for retry mechanism
+const (
+	maxRetries = 3
+	retryDelay = 1 * time.Second
+)
+
+// retryableOperation executes an HTTP operation with retries
+func (c *APIClient) retryableOperation(operation func() (*http.Response, error)) (*http.Response, error) {
+	var lastErr error
+	var resp *http.Response
+
+	for attempt := 0; attempt < maxRetries; attempt++ {
+		if attempt > 0 {
+			log.Printf("Retrying API call, attempt %d of %d", attempt+1, maxRetries)
+			time.Sleep(retryDelay * time.Duration(attempt)) // Exponential backoff
+		}
+
+		resp, lastErr = operation()
+		if lastErr != nil {
+			log.Printf("API call failed: %v, retrying...", lastErr)
+			continue
+		}
+
+		// Check if we got a rate limit or server error
+		if resp.StatusCode == http.StatusTooManyRequests ||
+			resp.StatusCode >= 500 {
+			log.Printf("Got status code %d, retrying...", resp.StatusCode)
+			body, _ := io.ReadAll(resp.Body)
+			resp.Body.Close()
+			log.Printf("Response body: %s", truncateString(string(body), 100))
+			lastErr = fmt.Errorf("got status code %d", resp.StatusCode)
+			continue
+		}
+
+		return resp, nil
+	}
+
+	return nil, fmt.Errorf("operation failed after %d attempts: %w", maxRetries, lastErr)
+}
+
+// truncateString shortens a string to the specified length and adds "..." if truncated
+func truncateString(s string, maxLen int) string {
+	if len(s) <= maxLen {
+		return s
+	}
+	return s[:maxLen] + "..."
+}
 
 const (
 	ListSelection = "Sélection"
@@ -232,7 +283,10 @@ func getStoredToken() (*oauth1.Token, error) {
 }
 
 func (c *APIClient) GetOrganization(name string) (Organization, error) {
-	resp, err := c.httpClient.Get(fmt.Sprintf("https://api.trello.com/1/organizations/%s", name))
+	// Use retry mechanism for getting organization
+	resp, err := c.retryableOperation(func() (*http.Response, error) {
+		return c.httpClient.Get(fmt.Sprintf("https://api.trello.com/1/organizations/%s", name))
+	})
 	if err != nil {
 		return Organization{}, err
 	}
@@ -256,7 +310,11 @@ func (c *APIClient) CreateBoard(org Organization, name string, permLvl Permissio
 	values.Add("idOrganization", org.ID)
 	values.Add("prefs_permissionLevel", string(permLvl))
 	postURL.RawQuery = values.Encode()
-	resp, err := c.httpClient.Post(postURL.String(), "application/json", nil)
+	
+	// Use retry mechanism for creating boards
+	resp, err := c.retryableOperation(func() (*http.Response, error) {
+		return c.httpClient.Post(postURL.String(), "application/json", nil)
+	})
 	if err != nil {
 		return Board{}, err
 	}
@@ -278,7 +336,11 @@ func (c *APIClient) CreateList(name string, board Board) (List, error) {
 	values.Add("idBoard", board.ID)
 	values.Add("pos", "bottom")
 	postURL.RawQuery = values.Encode()
-	resp, err := c.httpClient.Post(postURL.String(), "application/json", nil)
+	
+	// Use retry mechanism for creating lists
+	resp, err := c.retryableOperation(func() (*http.Response, error) {
+		return c.httpClient.Post(postURL.String(), "application/json", nil)
+	})
 	if err != nil {
 		return List{}, err
 	}
@@ -292,30 +354,44 @@ func (c *APIClient) CreateList(name string, board Board) (List, error) {
 
 func (c *APIClient) CreateLabel(name string, board Board, color Color) (Label, error) {
 	// labels are specific to a board
-	labelKey := board.ID + "|" + name
+	// Escape name for label cache key to avoid any issues with special characters
+	safeLabel := html.EscapeString(name)
+	labelKey := board.ID + "|" + safeLabel
+
 	c.mu.RLock()
 	label, ok := c.labels[labelKey]
 	c.mu.RUnlock()
 	if ok {
 		return label, nil
 	}
+
 	postURL, err := url.Parse("https://api.trello.com/1/labels")
 	if err != nil {
 		return Label{}, err
 	}
+
 	values := postURL.Query()
 	values.Add("name", name)
 	values.Add("color", string(color))
 	values.Add("idBoard", board.ID)
 	postURL.RawQuery = values.Encode()
-	resp, err := c.httpClient.Post(postURL.String(), "application/json", nil)
+
+	log.Printf("Creating label '%s' for board ID: %s", name, board.ID)
+	
+	// Use retry mechanism for creating labels
+	resp, err := c.retryableOperation(func() (*http.Response, error) {
+		return c.httpClient.Post(postURL.String(), "application/json", nil)
+	})
 	if err != nil {
-		return Label{}, err
+		return Label{}, fmt.Errorf("failed to create label: %w", err)
 	}
 	defer resp.Body.Close()
+
+	// Parse the response
 	if err := common.UnmarshalBody(resp.Body, &label); err != nil {
-		return Label{}, err
+		return Label{}, fmt.Errorf("error unmarshaling label response: %w", err)
 	}
+
 	c.mu.Lock()
 	defer c.mu.Unlock()
 	c.labels[labelKey] = label
@@ -323,23 +399,48 @@ func (c *APIClient) CreateLabel(name string, board Board, color Color) (Label, e
 }
 
 func (c *APIClient) CreateCard(name, desc string, list List, labels []Label) (Card, error) {
-	postURL, err := url.Parse("https://api.trello.com/1/cards")
+	postURL := "https://api.trello.com/1/cards"
+	
+	// HTML escape any potentially problematic characters in name and description
+	name = html.EscapeString(name)
+	desc = html.EscapeString(desc)
+	
+	// Create the request body as JSON instead of using query parameters
+	requestBody := map[string]interface{}{
+		"name": name,
+		"desc": desc,
+		"idList": list.ID,
+	}
+	
+	// Add labels if present
+	if len(labels) > 0 {
+		labelIDs := make([]string, 0, len(labels))
+		for _, label := range labels {
+			labelIDs = append(labelIDs, label.ID)
+		}
+		requestBody["idLabels"] = labelIDs
+	}
+	
+	// Marshal the request body to JSON
+	jsonBody, err := json.Marshal(requestBody)
 	if err != nil {
-		return Card{}, err
+		return Card{}, fmt.Errorf("error marshaling card request: %w", err)
 	}
-	values := postURL.Query()
-	values.Add("name", name)
-	values.Add("desc", desc)
-	values.Add("idList", list.ID)
-	for _, label := range labels {
-		values.Add("idLabels", label.ID)
-	}
-	postURL.RawQuery = values.Encode()
-	resp, err := c.httpClient.Post(postURL.String(), "application/json", nil)
+	
+	// Use retry mechanism for creating cards
+	resp, err := c.retryableOperation(func() (*http.Response, error) {
+		req, err := http.NewRequest("POST", postURL, bytes.NewBuffer(jsonBody))
+		if err != nil {
+			return nil, err
+		}
+		req.Header.Set("Content-Type", "application/json")
+		return c.httpClient.Do(req)
+	})
 	if err != nil {
 		return Card{}, err
 	}
 	defer resp.Body.Close()
+	
 	var card Card
 	if err := common.UnmarshalBody(resp.Body, &card); err != nil {
 		return Card{}, err
@@ -348,18 +449,42 @@ func (c *APIClient) CreateCard(name, desc string, list List, labels []Label) (Ca
 }
 
 func (c *APIClient) CreateComment(text string, card Card) error {
-	postURL, err := url.Parse(fmt.Sprintf("https://api.trello.com/1/cards/%s/actions/comments", card.ID))
-	if err != nil {
-		return err
+	postURL := fmt.Sprintf("https://api.trello.com/1/cards/%s/actions/comments", card.ID)
+	
+	// HTML escape the comment text to prevent issues with special characters
+	text = html.EscapeString(text)
+	
+	// Create the request body as JSON
+	requestBody := map[string]string{
+		"text": text,
 	}
-	values := postURL.Query()
-	values.Add("text", text)
-	postURL.RawQuery = values.Encode()
-	resp, err := c.httpClient.Post(postURL.String(), "application/json", nil)
+	
+	// Marshal the request body to JSON
+	jsonBody, err := json.Marshal(requestBody)
+	if err != nil {
+		return fmt.Errorf("error marshaling comment request: %w", err)
+	}
+	
+	// Use retry mechanism for creating comments
+	resp, err := c.retryableOperation(func() (*http.Response, error) {
+		req, err := http.NewRequest("POST", postURL, bytes.NewBuffer(jsonBody))
+		if err != nil {
+			return nil, err
+		}
+		req.Header.Set("Content-Type", "application/json")
+		return c.httpClient.Do(req)
+	})
 	if err != nil {
 		return err
 	}
 	defer resp.Body.Close()
+	
+	// Check for error in response
+	var response map[string]interface{}
+	if err := common.UnmarshalBody(resp.Body, &response); err != nil {
+		return fmt.Errorf("error creating comment: %v", err)
+	}
+	
 	return nil
 }
 
