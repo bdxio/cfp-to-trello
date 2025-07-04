@@ -64,7 +64,7 @@ func runImport(organizationName, trelloKey, trelloSecret, eventID, jsonPath stri
 	}
 
 	if err := importer.ImportCFP(organizationName, eventID, jsonPath, geo.FindLocation, client); err != nil {
-		log.Fatalf("Error while importing CFP into Trello: %v", err)
+		log.Fatalf("Error while importing CFP into Trello: %v", err, )
 	}
 }
 
