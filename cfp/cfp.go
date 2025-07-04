@@ -304,10 +304,10 @@ func parseConferenceHallProposals(proposals []ConferenceHallProposal, locate geo
 				if strings.Contains(strings.ToLower(speaker.Location), "bordeaux") ||
 					strings.Contains(strings.ToLower(speaker.Location), "gironde") {
 					speakerLabel += " 🍷"
+				} else {
+					speakerLabel += " 🗺️"
 				}
-			} else {
-				speakerLabel += " 🗺️"
-			}
+			} 
 
 			if speaker.Company != "" {
 				speakerLabel += " (" + speaker.Company + ")"

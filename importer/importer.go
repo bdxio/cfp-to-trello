@@ -303,81 +303,40 @@ func (t Trello) createDeliberationList(board trello.Board, name string, proposal
 }
 
 func (t Trello) createProposalCard(board trello.Board, list trello.List, proposal cfp.Proposal) error {
-	// Escape HTML characters in the proposal to prevent JSON parsing issues
-	escapedProposal := escapeCFPProposal(proposal)
-
-	log.Printf("Creating proposal card %s...\n", escapedProposal.Title)
-	
-	// Define all possible labels we might want to use
-	labelFunctions := []func(p cfp.Proposal) (string, trello.Color){
-		// Most important labels first
+	log.Printf("Creating proposal card %s...\n", proposal.Title)
+	labels, err := t.createLabels(board, proposal,
+		// Category label (green)
 		func(p cfp.Proposal) (string, trello.Color) { return p.Category, trello.ColorGreen },
-		func(p cfp.Proposal) (string, trello.Color) { 
-			return fmt.Sprintf("🏅 %1.1f", p.Rating), trello.ColorOrange 
+		// Rating label (orange)
+		func(p cfp.Proposal) (string, trello.Color) {
+			return fmt.Sprintf("🏅 %1.1f", p.Rating), trello.ColorOrange
 		},
-		func(p cfp.Proposal) (string, trello.Color) { 
-			return fmt.Sprintf("%d ❤️ / %d ☠️", p.Loves, p.Hates), trello.ColorRed 
+		// Loves/Hates count label (red)
+		func(p cfp.Proposal) (string, trello.Color) {
+			return fmt.Sprintf("%d ❤️ / %d ☠️", p.Loves, p.Hates), trello.ColorRed
 		},
-		// Less important labels last (these might be skipped)
-		func(p cfp.Proposal) (string, trello.Color) { return p.AudienceLevel, trello.ColorSky },
-		func(p cfp.Proposal) (string, trello.Color) { return p.Language, trello.ColorPink },
+		// Speaker label (purple) - keep as is, the formatting with Bordeaux emoji is done in cfp.Parse
 		func(p cfp.Proposal) (string, trello.Color) { return p.Speakers, trello.ColorPurple },
-	}
-	
-	// Only use the first maxLabelsPerCard labels to reduce payload size
-	// Using if statement instead of min() function for Go 1.19 compatibility
-	labelCount := len(labelFunctions)
-	if labelCount > maxLabelsPerCard {
-		labelCount = maxLabelsPerCard
-	}
-	
-	labels, err := t.createLabels(board, escapedProposal, labelFunctions[:labelCount]...)
+		// Audience level label (sky) - this comes from the "level" property
+		func(p cfp.Proposal) (string, trello.Color) { return p.AudienceLevel, trello.ColorSky },
+		// Language label (pink) - already using flag emoji
+		func(p cfp.Proposal) (string, trello.Color) { return p.Language, trello.ColorPink },
+	)
 	if err != nil {
 		return err
 	}
 
-	// Create a more compact description to reduce payload size
-	proposalUrl := fmt.Sprintf("%s/organizer/event/%s/proposals/%s", cfp.URL, t.eventID, escapedProposal.ID)
+	proposalUrl := fmt.Sprintf("%s/organizer/event/%s/proposals/%s", cfp.URL, t.eventID, proposal.ID)
 	proposalLink := fmt.Sprintf("📜 [Proposal](%s)", proposalUrl)
-	
-	// Include key metadata in the description to make up for fewer labels
-	metadataText := fmt.Sprintf("Category: %s | Rating: %1.1f | Level: %s | Lang: %s", 
-		escapedProposal.Category, 
-		escapedProposal.Rating,
-		escapedProposal.AudienceLevel,
-		escapedProposal.Language)
-	
-	cardDescription := fmt.Sprintf("%s\n\n%s\n\n---\n\n%s", 
-		proposalLink, 
-		metadataText,
-		escapedProposal.Abstract)
-	
-	// Only include private message if it's not empty
-	if escapedProposal.PrivateMessage != "" {
-		cardDescription += fmt.Sprintf("\n\n---\n\n%s", escapedProposal.PrivateMessage)
-	}
-	
-	cardDescription = truncateDescription(cardDescription)
-	card, err := t.client.CreateCard(escapedProposal.Title, cardDescription, list, labels)
+	cardDescription := fmt.Sprintf("%s\n\n---\n\n%s\n\n---\n\n%s", proposalLink, proposal.Abstract, proposal.PrivateMessage)
+	card, err := t.client.CreateCard(proposal.Title, cardDescription, list, labels)
 	if err != nil {
 		return err
 	}
 
-	// Limit the number of comments to reduce API calls
-	for i, message := range escapedProposal.OrganizerMessages {
-		// Skip empty messages
-		if len(strings.TrimSpace(message)) == 0 {
-			continue
-		}
-		
-		truncatedMessage := truncateComment(message)
-		if err := t.client.CreateComment(truncatedMessage, card); err != nil {
+	for _, message := range proposal.OrganizerMessages {
+		if err := t.client.CreateComment(message, card); err != nil {
 			return err
-		}
-		
-		// Add a small delay between comment creation to prevent rate limiting
-		if i < len(escapedProposal.OrganizerMessages)-1 {
-			time.Sleep(100 * time.Millisecond)
 		}
 	}
 	return nil
