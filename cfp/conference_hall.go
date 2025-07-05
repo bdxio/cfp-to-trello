@@ -1,8 +1,13 @@
 package cfp
 
+// This file contains the Conference Hall client for API interactions.
+// Type definitions for the ConferenceHallProposal and related types are now in cfp.go
+// to avoid duplication.
+
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"net/http/httptest"
@@ -11,6 +16,7 @@ import (
 	"strings"
 
 	"github.com/bdxio/cfp-to-trello/common"
+	"github.com/bdxio/cfp-to-trello/geo"
 )
 
 const URL = "https://conference-hall.io"
@@ -225,4 +231,25 @@ func (s *ConferenceHallServer) publishEvent(w http.ResponseWriter, r *http.Reque
 	result := fmt.Sprintf(`{"result": "Proposal with ID %s is now %sed."}`, paths[1], parameters[0])
 	w.Header().Add("Content-Type", "application/json")
 	w.Write([]byte(result))
+}
+
+// ParseConferenceHall parses the Conference Hall JSON format with array structure
+func ParseConferenceHall(path string, locate geo.Locator) (Event, error) {
+	f, err := os.Open(path)
+	if err != nil {
+		return Event{}, err
+	}
+	defer f.Close()
+
+	data, err := io.ReadAll(f)
+	if err != nil {
+		return Event{}, err
+	}
+
+	var proposals []ConferenceHallProposal
+	if err := json.Unmarshal(data, &proposals); err != nil {
+		return Event{}, fmt.Errorf("error unmarshaling Conference Hall format: %w", err)
+	}
+
+	return parseConferenceHallProposals(proposals, locate)
 }
